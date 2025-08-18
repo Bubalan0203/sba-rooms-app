@@ -23,6 +23,7 @@ import {
   List,
   useTheme,
   RadioButton,
+  Icon, // <-- Added Icon component here
 } from "react-native-paper";
 import {
   collection,
@@ -33,7 +34,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { Ionicons } from '@expo/vector-icons';
+// Switched to a single, consistent icon library: MaterialCommunityIcons
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import RNModal from "react-native-modal";
 
 import { db } from "../config/firebase";
@@ -158,7 +160,6 @@ function BookingPage() {
       await runTransaction(db, async (transaction) => {
         const bookingsCollection = collection(db, "bookings");
         for (const roomId of selectedRooms) {
-          const roomRef = doc(db, "rooms", roomId);
           const room = rooms.find(r => r.id === roomId);
           const finalAmount = parseFloat(roomDetails[roomId]?.amount || commonAmount || 0);
           transaction.set(doc(bookingsCollection), {
@@ -174,7 +175,7 @@ function BookingPage() {
             status: 'Active',
             createdAt: serverTimestamp()
           });
-          transaction.update(roomRef, { status: "Booked" });
+          transaction.update(doc(db, "rooms", roomId), { status: "Booked" });
         }
       });
       Alert.alert('Success', 'Booking successful!');
@@ -191,18 +192,9 @@ function BookingPage() {
     return total + amount;
   }, 0);
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <Text style={{ marginTop: 16 }}>Loading rooms...</Text>
-      </View>
-    );
-  }
-
   return (
     <PaperProvider theme={theme}>
-      <Appbar.Header style={styles.appBar}>
+      <Appbar.Header style={[styles.appBar, { backgroundColor: theme.colors.surface }]} >
         <Appbar.Content title="Booking Management" subtitle="Create new bookings and manage guest reservations" />
       </Appbar.Header>
 
@@ -210,11 +202,11 @@ function BookingPage() {
         {/* Welcome Card */}
         <Card style={styles.welcomeCard}>
           <Card.Content style={styles.welcomeContent}>
-            <Ionicons name="bed" size={48} color="#2196F3" />
+            <Icon source="bed-double-outline" size={48} color={theme.colors.primary} />
             <Text variant="headlineSmall" style={styles.welcomeTitle}>
               Ready to Create a New Booking?
             </Text>
-            <Text variant="bodyMedium" style={styles.welcomeSubtitle}>
+            <Text variant="bodyMedium" style={[styles.welcomeSubtitle, { color: theme.colors.onSurfaceVariant }]}>
               Click the "New Booking" button below to start the booking process for your guests.
             </Text>
             <Button
@@ -243,26 +235,11 @@ function BookingPage() {
             {/* Modal Header */}
             <View style={styles.modalHeader}>
               <Text variant="titleLarge">Create New Booking</Text>
-              <View style={styles.stepperContainer}>
-                {steps.map((label, index) => (
-                  <View key={label} style={styles.stepItem}>
-                    <View
-                      style={[
-                        styles.stepIcon,
-                        {
-                          backgroundColor:
-                            index <= step ? '#2196F3' : '#ccc',
-                        },
-                      ]}
-                    >
-                      <Text style={{ color: 'white', fontWeight: 'bold' }}>{index + 1}</Text>
-                    </View>
-                    <Text style={[styles.stepLabel, { color: index <= step ? '#2196F3' : '#666' }]}>
-                      {label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              <ProgressBar
+                progress={(step + 1) / steps.length}
+                color={theme.colors.primary}
+                style={{ marginTop: 16 }}
+              />
             </View>
 
             {/* Modal Body */}
@@ -271,7 +248,7 @@ function BookingPage() {
               {step === 0 && (
                 <View>
                   <View style={styles.stepHeader}>
-                    <Ionicons name="bed" size={24} color="#2196F3" />
+                    <Icon source="bed-double-outline" size={24} color={theme.colors.primary} />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Select Rooms
                     </Text>
@@ -298,7 +275,12 @@ function BookingPage() {
                     Available Rooms ({selectedRooms.length} / {numRooms} selected)
                   </Text>
                   <View style={styles.roomListContainer}>
-                    {rooms.length > 0 ? (
+                    {loading ? (
+                      <View style={{ padding: 20 }}>
+                        <ActivityIndicator />
+                        <Text style={{ textAlign: 'center', marginTop: 8 }}>Loading rooms...</Text>
+                      </View>
+                    ) : rooms.length > 0 ? (
                       rooms.map(room => (
                         <Pressable
                           key={room.id}
@@ -308,11 +290,11 @@ function BookingPage() {
                             styles.roomCard,
                             {
                               borderColor: selectedRooms.includes(room.id)
-                                ? '#2196F3'
-                                : '#ccc',
+                                ? theme.colors.primary
+                                : theme.colors.outline,
                               backgroundColor: selectedRooms.includes(room.id)
-                                ? '#E3F2FD'
-                                : '#fff',
+                                ? theme.colors.primaryContainer
+                                : theme.colors.surface,
                             },
                           ]}
                         >
@@ -333,7 +315,7 @@ function BookingPage() {
                         </Pressable>
                       ))
                     ) : (
-                      <Text style={styles.emptyText}>
+                      <Text style={[styles.emptyText, { color: theme.colors.onSurfaceVariant }]}>
                         No available rooms found
                       </Text>
                     )}
@@ -345,13 +327,13 @@ function BookingPage() {
               {step === 1 && (
                 <View>
                   <View style={styles.stepHeader}>
-                    <Ionicons name="person" size={24} color="#2196F3" />
+                    <Icon source="account" size={24} color={theme.colors.primary} />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Guest & Payment Details
                     </Text>
                   </View>
                   
-                  <View style={styles.sectionCard}>
+                  <Card style={styles.sectionCard}>
                     <Text variant="titleSmall" style={{ fontWeight: 'bold', marginBottom: 12 }}>
                       Guest Information
                     </Text>
@@ -360,6 +342,7 @@ function BookingPage() {
                       value={guestName}
                       onChangeText={setGuestName}
                       style={{ marginBottom: 16 }}
+                      mode="outlined"
                     />
                     <TextInput
                       label="Phone Number"
@@ -367,23 +350,24 @@ function BookingPage() {
                       onChangeText={setGuestPhone}
                       keyboardType="phone-pad"
                       style={{ marginBottom: 16 }}
+                      mode="outlined"
                     />
                     <Button
                       mode="outlined"
                       onPress={handleFileChange}
-                      icon={() => <Ionicons name="cloud-upload" size={20} />}
+                      icon="cloud-upload-outline"
                       style={{ marginBottom: 8 }}
                     >
                       Upload ID Proof
                     </Button>
                     {idProofBase64 && (
-                      <Text style={{ color: 'green', marginTop: 4 }}>
+                      <Text style={{ color: theme.colors.success, marginTop: 4 }}>
                         ID Proof uploaded successfully
                       </Text>
                     )}
-                  </View>
+                  </Card>
                   
-                  <View style={styles.sectionCard}>
+                  <Card style={styles.sectionCard}>
                     <Text variant="titleSmall" style={{ fontWeight: 'bold', marginBottom: 12 }}>
                       Room Details & Charges
                     </Text>
@@ -393,6 +377,7 @@ function BookingPage() {
                       onChangeText={handleCommonAmountChange}
                       keyboardType="numeric"
                       style={{ marginBottom: 16 }}
+                      mode="outlined"
                     />
                     <Divider style={{ marginVertical: 8 }} />
                     <ScrollView style={{ maxHeight: 200 }}>
@@ -410,6 +395,7 @@ function BookingPage() {
                                 onChangeText={(val) => handleDetailChange(roomId, 'numberOfPersons', val)}
                                 keyboardType="numeric"
                                 style={{ flex: 1 }}
+                                mode="outlined"
                               />
                               <TextInput
                                 label="Amount"
@@ -417,13 +403,14 @@ function BookingPage() {
                                 onChangeText={(val) => handleDetailChange(roomId, 'amount', val)}
                                 keyboardType="numeric"
                                 style={{ flex: 1 }}
+                                mode="outlined"
                               />
                             </View>
                           </View>
                         );
                       })}
                     </ScrollView>
-                  </View>
+                  </Card>
                 </View>
               )}
 
@@ -431,13 +418,13 @@ function BookingPage() {
               {step === 2 && (
                 <View>
                   <View style={styles.stepHeader}>
-                    <Ionicons name="checkmark-circle" size={24} color="#2196F3" />
+                    <Icon source="check-circle-outline" size={24} color={theme.colors.primary} />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Review & Confirm Booking
                     </Text>
                   </View>
                   
-                  <View style={styles.sectionCard}>
+                  <Card style={styles.sectionCard}>
                     <Text variant="titleSmall" style={{ fontWeight: 'bold', marginBottom: 12 }}>
                       Guest Details
                     </Text>
@@ -455,9 +442,9 @@ function BookingPage() {
                         </View>
                       </View>
                     )}
-                  </View>
+                  </Card>
                   
-                  <View style={styles.sectionCard}>
+                  <Card style={styles.sectionCard}>
                     <Text variant="titleSmall" style={{ fontWeight: 'bold', marginBottom: 12 }}>
                       Booking Summary
                     </Text>
@@ -479,17 +466,17 @@ function BookingPage() {
                     <Divider style={{ marginVertical: 12 }} />
                     <View style={styles.totalSummary}>
                       <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>Total Amount</Text>
-                      <Text variant="titleMedium" style={{ fontWeight: 'bold', color: '#2196F3' }}>
+                      <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
                         ₹{totalAmount.toFixed(2)}
                       </Text>
                     </View>
-                  </View>
+                  </Card>
                 </View>
               )}
             </ScrollView>
 
             {/* Modal Footer */}
-            <View style={styles.modalFooter}>
+            <View style={[styles.modalFooter, { backgroundColor: theme.colors.surface }]}>
               <Button
                 mode="text"
                 onPress={step === 0 ? handleCloseModal : handleBack}
@@ -561,6 +548,9 @@ const styles = StyleSheet.create({
   modalHeader: {
     marginBottom: 20,
   },
+  modalBody: {
+    paddingBottom: 20,
+  },
   stepperContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -580,9 +570,6 @@ const styles = StyleSheet.create({
   stepLabel: {
     marginTop: 4,
     fontSize: 12,
-  },
-  modalBody: {
-    paddingBottom: 20,
   },
   stepHeader: {
     flexDirection: 'row',

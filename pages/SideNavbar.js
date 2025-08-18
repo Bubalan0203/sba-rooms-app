@@ -33,21 +33,21 @@ const SideNavbar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { text: 'Dashboard', icon: 'dashboard', path: '/', color: theme.colors.primary },
-    { text: 'Manage Rooms', icon: 'hotel', path: '/rooms', color: '#26a69a' },
-    { text: 'New Booking', icon: 'book-online', path: '/booking', color: '#ff9800' },
-    { text: 'Active Bookings', icon: 'event-available', path: '/active-bookings', color: '#4caf50' },
-    { text: 'All Bookings', icon: 'history', path: '/all-bookings', color: '#9c27b0' },
+    { text: 'Manage Rooms', icon: 'hotel', path: '/rooms', color: theme.colors.tertiary },
+    { text: 'New Booking', icon: 'book-online', path: '/booking', color: theme.colors.warning },
+    { text: 'Active Bookings', icon: 'event-available', path: '/active-bookings', color: theme.colors.success },
+    { text: 'All Bookings', icon: 'history', path: '/all-bookings', color: theme.colors.accent },
   ];
 
   const drawerContent = (
-    <View style={styles.drawerContainer}>
+    <View style={[styles.drawerContainer, { backgroundColor: theme.colors.surface }]}>
       {/* Header Section */}
       <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         {/* Close button for mobile */}
         {isMobile && (
           <IconButton
             icon="close"
-            color="white"
+            iconColor={theme.colors.onPrimary}
             onPress={onClose}
             style={styles.closeButton}
           />
@@ -59,15 +59,15 @@ const SideNavbar = ({ isOpen, onClose }) => {
             style={[styles.avatar, { backgroundColor: `${theme.colors.onPrimary}20` }]}
             labelStyle={styles.avatarLabel}
           />
-          <Text variant="titleLarge" style={styles.title}>
+          <Text variant="titleLarge" style={[styles.title, { color: theme.colors.onPrimary }]}>
             SBA Rooms
           </Text>
-          <Chip
-            textStyle={{ color: 'white' }}
-            style={styles.chip}
-          >
-            Management System
-          </Chip>
+         <Chip
+      textStyle={{ color: theme.colors.onPrimary }}
+      style={[styles.chip, { backgroundColor: theme.colors.primary }]}
+    >
+      Management System
+    </Chip>
         </View>
       </View>
 
@@ -89,7 +89,7 @@ const SideNavbar = ({ isOpen, onClose }) => {
                 <List.Item
                   title={item.text}
                   left={() => <Icon name={item.icon} size={24} color={item.color} />}
-                  style={{ borderRadius: 8 }}
+                  style={{ borderRadius: 8, backgroundColor: 'transparent' }}
                   titleStyle={{ color: theme.colors.onSurfaceVariant }}
                 />
               </TouchableOpacity>
@@ -98,14 +98,14 @@ const SideNavbar = ({ isOpen, onClose }) => {
         </List.Section>
       </View>
 
-      <Divider style={styles.divider} />
+      <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
       
       {/* Footer */}
       <View style={styles.footer}>
-        <Text style={styles.footerText}>
+        <Text style={[styles.footerText, { color: theme.colors.onSurfaceDisabled }]}>
           © 2025 SBA Rooms
         </Text>
-        <Text style={styles.footerVersion}>
+        <Text style={[styles.footerVersion, { color: theme.colors.onSurfaceDisabled }]}>
           Version 1.0.0
         </Text>
       </View>
@@ -118,7 +118,7 @@ const SideNavbar = ({ isOpen, onClose }) => {
         <Modal
           visible={isOpen}
           onDismiss={onClose}
-          contentContainerStyle={styles.mobileModal}
+          contentContainerStyle={[styles.mobileModal, { backgroundColor: theme.colors.surface }]}
         >
           {drawerContent}
         </Modal>
@@ -127,7 +127,7 @@ const SideNavbar = ({ isOpen, onClose }) => {
   }
 
   return (
-    <View style={styles.desktopDrawer}>
+    <View style={[styles.desktopDrawer, { borderRightColor: theme.colors.outlineVariant }]}>
       {drawerContent}
     </View>
   );
@@ -137,7 +137,6 @@ const styles = StyleSheet.create({
   // Shared styles for both mobile and desktop drawers
   drawerContainer: {
     flex: 1,
-    backgroundColor: '#fff',
     width: '100%',
   },
   header: {
@@ -167,7 +166,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   title: {
-    color: 'white',
     fontWeight: 'bold',
     marginBottom: 4,
   },
@@ -191,12 +189,10 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 12,
-    color: 'gray',
   },
   footerVersion: {
     fontSize: 10,
     marginTop: 4,
-    color: 'gray',
   },
   
   // Mobile-specific styles
@@ -214,7 +210,6 @@ const styles = StyleSheet.create({
     width: 280,
     height: '100%',
     borderRightWidth: StyleSheet.hairlineWidth,
-    borderRightColor: '#ccc',
   },
 });
 

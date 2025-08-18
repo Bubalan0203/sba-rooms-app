@@ -20,6 +20,7 @@ import {
   Portal,
   TextInput,
   Divider,
+  Icon, // <-- Added Icon component here
 } from "react-native-paper";
 import {
   collection,
@@ -30,7 +31,8 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
-import { Ionicons } from '@expo/vector-icons';
+// Switched to a single, consistent icon library: MaterialCommunityIcons
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { db } from "../config/firebase";
 
@@ -208,8 +210,8 @@ const ActiveBookingsPage = () => {
           <View style={styles.titleContainer}>
             <Avatar.Icon 
               size={48} 
-              icon={() => <Ionicons name="time" size={24} color="#2196F3" />} 
-              style={{ backgroundColor: '#E3F2FD' }} 
+              icon={() => <Icon source="clock-time-three-outline" size={24} color={theme.colors.primary} />} 
+              style={{ backgroundColor: theme.colors.primaryContainer }} 
             />
             <View style={{ marginLeft: 16 }}>
               <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>Active Bookings</Text>
@@ -231,7 +233,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#F44336' }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.error }}>
                   {activeBookings.filter(b => {
                     const cycleEnd = getBookingCycleEnd(b.checkIn);
                     return cycleEnd && new Date() > cycleEnd;
@@ -242,7 +244,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#2196F3' }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
                   ₹{activeBookings.reduce((sum, b) => sum + (b.amount || 0), 0).toLocaleString()}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Total Revenue</Text>
@@ -250,7 +252,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.success }}>
                   {Math.round(activeBookings.reduce((sum, b) => sum + (b.numberOfPersons || 1), 0) / Math.max(activeBookings.length, 1))}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Avg. Guests</Text>
@@ -272,7 +274,7 @@ const ActiveBookingsPage = () => {
                   style={[
                     styles.card,
                     {
-                      borderColor: isOverdue ? '#F44336' : '#2196F3',
+                      borderColor: isOverdue ? theme.colors.error : theme.colors.primary,
                     },
                   ]}
                 >
@@ -282,18 +284,18 @@ const ActiveBookingsPage = () => {
                       <View style={styles.roomInfo}>
                         <Avatar.Icon 
                           size={40} 
-                          icon={() => <Ionicons name="bed" size={20} color="#2196F3" />} 
-                          style={{ backgroundColor: '#E3F2FD' }} 
+                          icon={() => <Icon source="bed" size={20} color={theme.colors.primary} />} 
+                          style={{ backgroundColor: theme.colors.primaryContainer }} 
                         />
                         <Text variant="titleMedium" style={{ fontWeight: 'bold', marginLeft: 8 }}>
                           Room {booking.roomNo}
                         </Text>
                       </View>
                       <Chip
-                        icon={() => <Ionicons name={isOverdue ? "warning" : "checkmark-circle"} size={18} color={isOverdue ? '#F44336' : '#4CAF50'} />}
-                        style={{ backgroundColor: isOverdue ? '#FFEBEE' : '#E8F5E8' }}
+                        icon={() => <Icon source={isOverdue ? 'alert-circle' : 'check-circle'} size={18} color={isOverdue ? theme.colors.error : theme.colors.success} />}
+                        style={{ backgroundColor: isOverdue ? theme.colors.errorContainer : theme.colors.successContainer }}
                       >
-                        <Text style={{ color: isOverdue ? '#F44336' : '#4CAF50' }}>
+                        <Text style={{ color: isOverdue ? theme.colors.onError : theme.colors.onSuccess }}>
                           {isOverdue ? "Overdue" : "Active"}
                         </Text>
                       </Chip>
@@ -301,20 +303,20 @@ const ActiveBookingsPage = () => {
 
                     {/* Guest Info */}
                     <View style={styles.detailRow}>
-                      <Ionicons name="person" size={18} color="#666" />
+                      <Icon source="account" size={18} color={theme.colors.onSurfaceVariant} />
                       <Text style={{ fontWeight: 'bold', marginLeft: 8 }}>
                         {booking.guestName}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
-                      <Ionicons name="call" size={18} color="#666" />
+                      <Icon source="phone" size={18} color={theme.colors.onSurfaceVariant} />
                       <Text style={{ marginLeft: 8 }}>
                         {booking.customerPhone}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
-                      <Ionicons name="cash" size={18} color="#4CAF50" />
-                      <Text style={{ fontWeight: 'bold', marginLeft: 8, color: '#4CAF50' }}>
+                      <Icon source="cash" size={18} color={theme.colors.success} />
+                      <Text style={{ fontWeight: 'bold', marginLeft: 8, color: theme.colors.success }}>
                         ₹{parseFloat(booking.amount).toLocaleString()}
                       </Text>
                     </View>
@@ -323,15 +325,15 @@ const ActiveBookingsPage = () => {
 
                     {/* Timing Info */}
                     <View style={styles.detailRow}>
-                      <Ionicons name="time" size={18} color="#2196F3" />
+                      <Icon source="clock" size={18} color={theme.colors.onSurfaceVariant} />
                       <Text style={{ marginLeft: 8, color: theme.colors.onSurfaceVariant }}>
                         Check-in: {formatDate(booking.checkIn?.toDate())}
                       </Text>
                     </View>
                     {cycleEndDate && (
                       <View style={styles.detailRow}>
-                        <Ionicons name="time" size={18} color={isOverdue ? '#F44336' : '#FF9800'} />
-                        <Text style={{ marginLeft: 8, color: isOverdue ? '#F44336' : '#FF9800' }}>
+                        <Icon source="calendar-clock" size={18} color={isOverdue ? theme.colors.error : theme.colors.warning} />
+                        <Text style={{ marginLeft: 8, color: isOverdue ? theme.colors.error : theme.colors.warning }}>
                           Cycle ends: {formatDate(cycleEndDate)}
                         </Text>
                       </View>
@@ -339,8 +341,8 @@ const ActiveBookingsPage = () => {
                     
                     {/* Persons */}
                     <Chip
-                      icon={() => <Ionicons name="people" size={18} />}
-                      style={{ marginTop: 12, backgroundColor: '#E3F2FD' }}
+                      icon={() => <Icon source="account-group" size={18} />}
+                      style={{ marginTop: 12, backgroundColor: theme.colors.surfaceVariant }}
                     >
                       <Text>
                         {booking.numberOfPersons || 1} Guest{(booking.numberOfPersons || 1) > 1 ? 's' : ''}
@@ -371,7 +373,7 @@ const ActiveBookingsPage = () => {
         ) : (
           <Card style={styles.emptyStateCard}>
             <Card.Content style={styles.emptyStateContent}>
-              <Ionicons name="time" size={64} color="#ccc" />
+              <Icon source="clock-time-three-outline" size={64} color={theme.colors.onSurfaceVariant} />
               <Text variant="titleMedium" style={styles.emptyStateText}>
                 No Active Bookings
               </Text>

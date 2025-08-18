@@ -20,6 +20,7 @@ import {
   Portal,
   useTheme,
   FAB,
+  Icon, // <-- Added Icon component here
 } from "react-native-paper";
 import {
   collection,
@@ -32,7 +33,8 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
-import { Ionicons } from '@expo/vector-icons';
+// Switched to a single, consistent icon library: MaterialCommunityIcons
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { db } from "../config/firebase";
 
@@ -130,11 +132,11 @@ function RoomsPage() {
   };
 
   const getStatusIcon = (status) => {
-    return status === "Available" ? "checkmark-circle" : "close-circle";
+    return status === "Available" ? "check-circle" : "close-circle";
   };
 
   const getStatusColor = (status) => {
-    return status === "Available" ? "#4CAF50" : "#F44336";
+    return status === "Available" ? theme.colors.success : theme.colors.error;
   };
 
   if (loading) {
@@ -204,12 +206,12 @@ function RoomsPage() {
                 >
                   <Card.Content>
                     <View style={styles.cardHeader}>
-                      <View style={[styles.avatar, { backgroundColor: '#E3F2FD' }]}>
-                        <Ionicons name="bed" size={24} color="#2196F3" />
+                      <View style={[styles.avatar, { backgroundColor: theme.colors.primaryContainer }]}>
+                        <Icon source="bed" size={24} color={theme.colors.primary} />
                       </View>
                       <View style={styles.statusChip}>
-                        <Ionicons
-                          name={getStatusIcon(room.status)}
+                        <Icon
+                          source={getStatusIcon(room.status)}
                           size={18}
                           color={getStatusColor(room.status)}
                         />
@@ -224,17 +226,17 @@ function RoomsPage() {
                     </Text>
 
                     <View style={styles.roomTypeContainer}>
-                      <Ionicons name={getRoomIcon(room.roomType)} size={20} color="#666" />
+                      <Icon source={getRoomIcon(room.roomType)} size={20} color={theme.colors.onSurfaceVariant} />
                       <Text style={{ marginLeft: 8 }}>{room.roomType}</Text>
                     </View>
                   </Card.Content>
                   <Card.Actions style={styles.cardActions}>
                     <IconButton 
-                      icon={() => <Ionicons name="pencil" size={20} />} 
+                      icon={() => <Icon source="pencil" size={20} />} 
                       onPress={() => handleEdit(room)} 
                     />
                     <IconButton 
-                      icon={() => <Ionicons name="trash" size={20} />} 
+                      icon={() => <Icon source="trash-can-outline" size={20} />} 
                       onPress={() => handleOpenDeleteDialog(room.id)} 
                     />
                   </Card.Actions>
@@ -242,9 +244,9 @@ function RoomsPage() {
               ))}
             </View>
           ) : (
-            <Card style={styles.emptyStateCard}>
+            <Card style={[styles.emptyStateCard, { borderColor: theme.colors.outlineVariant }]}>
               <Card.Content style={styles.emptyStateContent}>
-                <Ionicons name="bed" size={64} color="#ccc" />
+                <Icon source="bed" size={64} color={theme.colors.onSurfaceDisabled} />
                 <Text variant="titleMedium" style={styles.emptyStateText}>
                   No rooms found
                 </Text>
@@ -273,7 +275,7 @@ function RoomsPage() {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={handleCloseDeleteDialog}>Cancel</Button>
-            <Button onPress={confirmDelete} mode="contained" buttonColor="#F44336">
+            <Button onPress={confirmDelete} mode="contained" buttonColor={theme.colors.error}>
               Delete
             </Button>
           </Dialog.Actions>
@@ -282,7 +284,7 @@ function RoomsPage() {
 
       {/* FAB */}
       <FAB
-        icon={() => <Ionicons name="add" size={24} />}
+        icon="plus"
         label="Add New Room"
         onPress={() => setShowForm(true)}
         style={styles.fab}

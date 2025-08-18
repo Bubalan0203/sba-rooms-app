@@ -19,9 +19,10 @@ import {
   ProgressBar,
   Appbar,
   Button,
+  Icon // Import the Icon component
 } from "react-native-paper";
 import { collection, onSnapshot } from "firebase/firestore";
-import { Ionicons } from '@expo/vector-icons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // Correct import for MaterialIcons
 import {
   LineChart,
   BarChart,
@@ -34,6 +35,7 @@ import {
   startOfDay,
   endOfDay,
 } from "date-fns";
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { db } from "../config/firebase";
 
@@ -43,31 +45,32 @@ const KPICard = ({ title, value, icon, color, trend }) => {
   const theme = useTheme();
   
   return (
-    <Card
-      style={[
-        styles.kpiCard,
-        {
-          borderColor: `${color}30`,
-        },
-      ]}
-    >
-      <Card.Content style={styles.kpiCardContent}>
-        <View style={styles.kpiHeader}>
-          <Avatar.Icon
-            size={56}
-            icon={() => <Ionicons name={icon} size={28} color={color} />}
-            style={{ backgroundColor: `${color}20` }}
-          />
-          {trend && (
-            <Chip
-              icon={() => <Ionicons name="trending-up" size={18} color={theme.colors.primary} />}
-              style={{ backgroundColor: `${theme.colors.primary}20` }}
-            >
-              <Text style={{ color: theme.colors.primary }}>{trend}</Text>
-            </Chip>
-          )}
-        </View>
-        <Text variant="headlineMedium" style={styles.kpiValue}>
+    <Animated.View entering={FadeIn.duration(500)}>
+      <Card
+        style={[
+          styles.kpiCard,
+          {
+            borderColor: color,
+          },
+        ]}
+      >
+        <Card.Content style={styles.kpiCardContent}>
+          <View style={styles.kpiHeader}>
+            <Avatar.Icon
+              size={56}
+              icon={icon}
+              style={{ backgroundColor: color }}
+            />
+            {trend && (
+             <Chip
+    icon={() => <Icon source="trending-up" size={18} color={theme.colors.onPrimaryContainer} />}
+    style={{ backgroundColor: theme.colors.primaryContainer }}
+  >
+    <Text style={{ color: theme.colors.onPrimaryContainer }}>{trend}</Text>
+  </Chip>
+            )}
+          </View>
+          <Text variant="headlineMedium" style={styles.kpiValue}>
           {value}
         </Text>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -75,6 +78,7 @@ const KPICard = ({ title, value, icon, color, trend }) => {
         </Text>
       </Card.Content>
     </Card>
+    </Animated.View>
   );
 };
 
@@ -200,7 +204,7 @@ const DashboardPage = () => {
     labels: revenueOverTime.labels.length > 0 ? revenueOverTime.labels : ['No Data'],
     datasets: [{
       data: revenueOverTime.data.length > 0 ? revenueOverTime.data : [0],
-      color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
+      color: (opacity = 1) => theme.colors.primary,
       strokeWidth: 3,
     }],
     legend: ["Revenue"]
@@ -210,14 +214,14 @@ const DashboardPage = () => {
     labels: bookingsByRoom.labels.length > 0 ? bookingsByRoom.labels : ['No Data'],
     datasets: [{
       data: bookingsByRoom.data.length > 0 ? bookingsByRoom.data : [0],
-      color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
+      color: (opacity = 1) => theme.colors.secondary,
     }],
     legend: ["# of Bookings"]
   };
   
   const chartConfig = {
-    backgroundGradientFrom: "#fff",
-    backgroundGradientTo: "#fff",
+    backgroundGradientFrom: theme.colors.surface,
+    backgroundGradientTo: theme.colors.surface,
     color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     strokeWidth: 2,
     barPercentage: 0.5,
@@ -225,7 +229,7 @@ const DashboardPage = () => {
     propsForDots: {
       r: "6",
       strokeWidth: "2",
-      stroke: "#2196F3",
+      stroke: theme.colors.primary,
     },
     decimalPlaces: 0,
   };
@@ -298,29 +302,29 @@ const DashboardPage = () => {
           <KPICard
             title="Total Revenue"
             value={`₹${totalRevenue.toLocaleString()}`}
-            icon="cash"
-            color="#4CAF50"
+            icon="attach-money"
+            color={theme.colors.success}
             trend="+12%"
           />
           <KPICard
             title="Total Bookings"
             value={totalBookings}
-            icon="bed"
-            color="#2196F3"
+            icon="hotel"
+            color={theme.colors.primary}
             trend="+8%"
           />
           <KPICard
             title="Occupancy Rate"
             value={`${occupancyRate.toFixed(1)}%`}
-            icon="analytics"
-            color="#FF9800"
+            icon="assessment"
+            color={theme.colors.warning}
             trend="+5%"
           />
           <KPICard
             title="Avg. Daily Rate"
             value={`₹${averageDailyRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             icon="trending-up"
-            color="#9C27B0"
+            color={theme.colors.secondary}
             trend="+15%"
           />
         </View>
@@ -392,14 +396,14 @@ const DashboardPage = () => {
                     <Chip>{room.totalBookings}</Chip>
                   </View>
                   <View style={styles.tableCell}>
-                    <Text style={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                    <Text style={{ fontWeight: 'bold', color: theme.colors.success }}>
                       ₹{room.totalRevenue.toLocaleString()}
                     </Text>
                   </View>
                   <View style={styles.tableCell}>
                     <ProgressBar
                       progress={Math.min((room.totalRevenue / Math.max(...performanceByRoom.map(r => r.totalRevenue))) * 100, 100) / 100}
-                      color={index === 0 ? '#4CAF50' : '#2196F3'}
+                      color={index === 0 ? theme.colors.success : theme.colors.primary}
                       style={{ width: 80 }}
                     />
                   </View>

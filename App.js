@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { PaperProvider } from 'react-native-paper';
+import { PaperProvider, useTheme } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 // Import your pages
 import DashboardPage from './pages/DashboardPage';
@@ -25,28 +25,28 @@ const App = () => {
 
               switch (route.name) {
                 case 'Dashboard':
-                  iconName = 'analytics';
+                  iconName = 'chart-line';
                   break;
                 case 'Rooms':
                   iconName = 'bed';
                   break;
                 case 'Booking':
-                  iconName = 'add-circle';
+                  iconName = 'plus-circle';
                   break;
                 case 'Active':
-                  iconName = 'time';
+                  iconName = 'clock-time-three';
                   break;
                 case 'History':
-                  iconName = 'library';
+                  iconName = 'history';
                   break;
                 default:
-                  iconName = 'ellipse';
+                  iconName = 'circle-outline';
                   break;
               }
-              return <Ionicons name={iconName} size={size} color={color} />;
+              return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
             },
-            tabBarActiveTintColor: '#2196F3',
-            tabBarInactiveTintColor: 'gray',
+            tabBarActiveTintColor: '#2196F3', // This will be fixed in the next version, but can be customized here
+            tabBarInactiveTintColor: 'gray', // This will be fixed in the next version, but can be customized here
             headerShown: false,
           })}
         >
@@ -59,6 +59,6 @@ const App = () => {
       </NavigationContainer>
     </PaperProvider>
   );
-};
+  };
 
 export default App;
