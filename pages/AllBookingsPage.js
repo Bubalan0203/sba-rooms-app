@@ -24,10 +24,8 @@ import {
   Divider,
 } from "react-native-paper";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
-// Make sure to import your firebase config and db instance
 import { db } from "../config/firebase";
 
 const AllBookingsPage = () => {
@@ -73,9 +71,6 @@ const AllBookingsPage = () => {
   };
 
   const handleGenerateBill = (booking) => {
-    // This functionality requires a dedicated React Native PDF library.
-    // The web-based jspdf library cannot be used.
-    // This is a placeholder for a real implementation.
     Alert.alert(
       "Download Bill",
       `Simulated: Bill for Room ${booking.roomNo} is being prepared for download. You would use a library like react-native-html-to-pdf here.`
@@ -84,28 +79,19 @@ const AllBookingsPage = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Active': return theme.colors.primary;
-      case 'Completed': return theme.colors.info;
-      case 'Extended': return theme.colors.warning;
-      default: return theme.colors.secondary;
+      case 'Active': return '#2196F3';
+      case 'Completed': return '#4CAF50';
+      case 'Extended': return '#FF9800';
+      default: return '#9E9E9E';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Active': return 'hotel';
-      case 'Completed': return 'check-circle';
-      case 'Extended': return 'autorenew';
-      default: return 'help-outline';
-    }
-  };
-
-  const getStatusEmoji = (status) => {
-    switch (status) {
-      case 'Active': return '🟢';
-      case 'Completed': return '✅';
-      case 'Extended': return '🔄';
-      default: return '⚪';
+      case 'Active': return 'bed';
+      case 'Completed': return 'checkmark-circle';
+      case 'Extended': return 'refresh';
+      default: return 'help-circle';
     }
   };
 
@@ -151,7 +137,11 @@ const AllBookingsPage = () => {
         {/* Header and Stats */}
         <View style={styles.headerContainer}>
           <View style={styles.titleContainer}>
-            <Avatar.Icon size={48} icon="history" style={{ backgroundColor: theme.colors.primary }} />
+            <Avatar.Icon 
+              size={48} 
+              icon={() => <Ionicons name="library" size={24} color="#2196F3" />} 
+              style={{ backgroundColor: '#E3F2FD' }} 
+            />
             <View style={{ marginLeft: 16 }}>
               <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>All Bookings</Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -164,8 +154,12 @@ const AllBookingsPage = () => {
           <View style={styles.statsGrid}>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Avatar.Icon size={40} icon="history" style={{ backgroundColor: `${theme.colors.primary}30`, color: theme.colors.primary }} />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+                <Avatar.Icon 
+                  size={40} 
+                  icon={() => <Ionicons name="library" size={20} color="#2196F3" />} 
+                  style={{ backgroundColor: '#E3F2FD' }} 
+                />
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#2196F3' }}>
                   {stats.total}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Total Bookings</Text>
@@ -173,8 +167,12 @@ const AllBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Avatar.Icon size={40} icon="hotel" style={{ backgroundColor: `${theme.colors.success}30`, color: theme.colors.success }} />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.success }}>
+                <Avatar.Icon 
+                  size={40} 
+                  icon={() => <Ionicons name="bed" size={20} color="#4CAF50" />} 
+                  style={{ backgroundColor: '#E8F5E8' }} 
+                />
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#4CAF50' }}>
                   {stats.active}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Active</Text>
@@ -182,8 +180,12 @@ const AllBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Avatar.Icon size={40} icon="calendar-today" style={{ backgroundColor: `${theme.colors.info}30`, color: theme.colors.info }} />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.info }}>
+                <Avatar.Icon 
+                  size={40} 
+                  icon={() => <Ionicons name="calendar" size={20} color="#FF9800" />} 
+                  style={{ backgroundColor: '#FFF3E0' }} 
+                />
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#FF9800' }}>
                   {stats.completed}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Completed</Text>
@@ -191,8 +193,12 @@ const AllBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Avatar.Icon size={40} icon="attach-money" style={{ backgroundColor: `${theme.colors.warning}30`, color: theme.colors.warning }} />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.warning }}>
+                <Avatar.Icon 
+                  size={40} 
+                  icon={() => <Ionicons name="cash" size={20} color="#9C27B0" />} 
+                  style={{ backgroundColor: '#F3E5F5' }} 
+                />
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#9C27B0' }}>
                   ₹{stats.totalRevenue.toLocaleString()}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Total Revenue</Text>
@@ -208,14 +214,14 @@ const AllBookingsPage = () => {
             label="Search by name, room, or phone"
             value={searchTerm}
             onChangeText={setSearchTerm}
-            left={<TextInput.Icon icon="magnify" />}
+            left={<TextInput.Icon icon={() => <Ionicons name="search" size={20} />} />}
           />
           <TextInput
             style={styles.textInput}
             label="Status Filter"
             value={statusFilter}
             onChangeText={setStatusFilter}
-            right={<TextInput.Icon icon="menu-down" />}
+            right={<TextInput.Icon icon={() => <Ionicons name="chevron-down" size={20} />} />}
             showSoftInputOnFocus={false}
             onPressIn={() => Alert.alert("Filter", "This is a placeholder for a status picker. Select a status.", [
               { text: "All", onPress: () => setStatusFilter("All") },
@@ -230,49 +236,47 @@ const AllBookingsPage = () => {
         </Card>
 
         {/* Bookings List */}
-        <Animated.View entering={FadeIn.duration(500)}>
-          <Card style={styles.tableCard}>
-            {filteredBookings.length > 0 ? (
-              <List.Section>
-                {filteredBookings.map((booking) => (
-                  <View key={booking.id}>
-                    <TouchableOpacity onPress={() => handleViewDetails(booking)}>
-                      <View style={styles.row}>
-                        <View style={styles.cell}>
-                          <Text style={{ fontWeight: 'bold' }}>Room {booking.roomNo}</Text>
-                          <Text style={{ color: theme.colors.onSurfaceVariant }}>{booking.guestName}</Text>
-                        </View>
-                        <View style={styles.cell}>
-                          <Chip
-                            icon={() => <Icon name={getStatusIcon(booking.status)} size={18} />}
-                            style={{ backgroundColor: `${getStatusColor(booking.status)}30` }}
-                          >
-                            <Text style={{ color: getStatusColor(booking.status) }}>{booking.status}</Text>
-                          </Chip>
-                          <Text style={{ marginTop: 4, color: theme.colors.primary }}>
-                            ₹{booking.amount?.toLocaleString()}
-                          </Text>
-                        </View>
+        <Card style={styles.tableCard}>
+          {filteredBookings.length > 0 ? (
+            <List.Section>
+              {filteredBookings.map((booking) => (
+                <View key={booking.id}>
+                  <TouchableOpacity onPress={() => handleViewDetails(booking)}>
+                    <View style={styles.row}>
+                      <View style={styles.cell}>
+                        <Text style={{ fontWeight: 'bold' }}>Room {booking.roomNo}</Text>
+                        <Text style={{ color: theme.colors.onSurfaceVariant }}>{booking.guestName}</Text>
                       </View>
-                    </TouchableOpacity>
-                    <Divider />
-                  </View>
-                ))}
-              </List.Section>
-            ) : (
-              <View style={styles.emptyStateContainer}>
-                <Icon name="history" size={48} color={theme.colors.onSurfaceDisabled} />
-                <Text variant="titleMedium" style={{ marginTop: 16 }}>No bookings found</Text>
-                <Text variant="bodySmall" style={{ textAlign: 'center', marginTop: 8 }}>
-                  {searchTerm || statusFilter !== 'All'
-                    ? 'Try adjusting your search or filter criteria'
-                    : 'Bookings will appear here once guests check in'
-                  }
-                </Text>
-              </View>
-            )}
-          </Card>
-        </Animated.View>
+                      <View style={styles.cell}>
+                        <Chip
+                          icon={() => <Ionicons name={getStatusIcon(booking.status)} size={18} />}
+                          style={{ backgroundColor: `${getStatusColor(booking.status)}30` }}
+                        >
+                          <Text style={{ color: getStatusColor(booking.status) }}>{booking.status}</Text>
+                        </Chip>
+                        <Text style={{ marginTop: 4, color: '#2196F3' }}>
+                          ₹{booking.amount?.toLocaleString()}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                  <Divider />
+                </View>
+              ))}
+            </List.Section>
+          ) : (
+            <View style={styles.emptyStateContainer}>
+              <Ionicons name="library" size={48} color="#ccc" />
+              <Text variant="titleMedium" style={{ marginTop: 16 }}>No bookings found</Text>
+              <Text variant="bodySmall" style={{ textAlign: 'center', marginTop: 8 }}>
+                {searchTerm || statusFilter !== 'All'
+                  ? 'Try adjusting your search or filter criteria'
+                  : 'Bookings will appear here once guests check in'
+                }
+              </Text>
+            </View>
+          )}
+        </Card>
       </ScrollView>
 
       {/* Booking Details Dialog */}
@@ -287,22 +291,22 @@ const AllBookingsPage = () => {
                   <List.Item
                     title="Guest Name"
                     description={selectedBooking.guestName}
-                    left={() => <List.Icon icon="person" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="person" size={20} />} />}
                   />
                   <List.Item
                     title="Phone Number"
                     description={selectedBooking.customerPhone}
-                    left={() => <List.Icon icon="phone" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="call" size={20} />} />}
                   />
                   <List.Item
                     title="Number of Persons"
                     description={selectedBooking.numberOfPersons}
-                    left={() => <List.Icon icon="people" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="people" size={20} />} />}
                   />
                   <List.Item
                     title="Status"
                     description={selectedBooking.status}
-                    left={() => <List.Icon icon={getStatusIcon(selectedBooking.status)} />}
+                    left={() => <List.Icon icon={() => <Ionicons name={getStatusIcon(selectedBooking.status)} size={20} />} />}
                   />
                 </List.Section>
                 <Divider />
@@ -311,23 +315,25 @@ const AllBookingsPage = () => {
                   <List.Item
                     title="Check-In Time"
                     description={formatTimestamp(selectedBooking.checkIn)}
-                    left={() => <List.Icon icon="calendar-today" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="calendar" size={20} />} />}
                   />
                   <List.Item
                     title="Check-Out Time"
                     description={selectedBooking.checkOut ? formatTimestamp(selectedBooking.checkOut) : "Not Checked Out"}
-                    left={() => <List.Icon icon="calendar-check" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="calendar" size={20} />} />}
                   />
                   <List.Item
                     title="Total Amount"
                     description={`₹${selectedBooking.amount?.toLocaleString()}`}
-                    left={() => <List.Icon icon="attach-money" />}
+                    left={() => <List.Icon icon={() => <Ionicons name="cash" size={20} />} />}
                   />
                 </List.Section>
                 {selectedBooking.idProof && (
                   <View style={{ marginTop: 24 }}>
                     <Text variant="titleMedium" style={{ fontWeight: 'bold', marginBottom: 8 }}>ID Proof</Text>
-                    <View style={styles.imagePlaceholder} />
+                    <View style={styles.imagePlaceholder}>
+                      <Text>ID Proof Image</Text>
+                    </View>
                     <Text style={{ marginTop: 8, color: theme.colors.onSurfaceDisabled }}>
                       (Simulated image placeholder)
                     </Text>
@@ -341,7 +347,7 @@ const AllBookingsPage = () => {
             <Button
               onPress={() => handleGenerateBill(selectedBooking)}
               mode="contained"
-              icon="download"
+              icon={() => <Ionicons name="download" size={20} />}
             >
               Download Bill
             </Button>
@@ -416,7 +422,6 @@ const styles = StyleSheet.create({
     padding: 48,
   },
   dialog: {
-    // This is a common pattern for styling dialogs to be full-width on mobile
     marginHorizontal: 16,
   },
   imagePlaceholder: {
@@ -424,6 +429,8 @@ const styles = StyleSheet.create({
     height: 200,
     backgroundColor: '#e0e0e0',
     borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

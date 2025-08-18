@@ -30,10 +30,8 @@ import {
   serverTimestamp,
   Timestamp,
 } from "firebase/firestore";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
-// Make sure to import your firebase config and db instance
 import { db } from "../config/firebase";
 
 const BOOKING_START_HOUR = 12;
@@ -190,6 +188,7 @@ const ActiveBookingsPage = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 16 }}>Loading active bookings...</Text>
       </View>
     );
   }
@@ -207,7 +206,11 @@ const ActiveBookingsPage = () => {
         {/* Header and Stats */}
         <View style={styles.headerContainer}>
           <View style={styles.titleContainer}>
-            <Avatar.Icon size={48} icon="event-available" style={{ backgroundColor: theme.colors.primary }} />
+            <Avatar.Icon 
+              size={48} 
+              icon={() => <Ionicons name="time" size={24} color="#2196F3" />} 
+              style={{ backgroundColor: '#E3F2FD' }} 
+            />
             <View style={{ marginLeft: 16 }}>
               <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>Active Bookings</Text>
               <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -228,7 +231,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.error }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#F44336' }}>
                   {activeBookings.filter(b => {
                     const cycleEnd = getBookingCycleEnd(b.checkIn);
                     return cycleEnd && new Date() > cycleEnd;
@@ -239,7 +242,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#2196F3' }}>
                   ₹{activeBookings.reduce((sum, b) => sum + (b.amount || 0), 0).toLocaleString()}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Total Revenue</Text>
@@ -247,7 +250,7 @@ const ActiveBookingsPage = () => {
             </Card>
             <Card style={styles.statCard}>
               <View style={styles.statContent}>
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.info }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#4CAF50' }}>
                   {Math.round(activeBookings.reduce((sum, b) => sum + (b.numberOfPersons || 1), 0) / Math.max(activeBookings.length, 1))}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Avg. Guests</Text>
@@ -264,108 +267,111 @@ const ActiveBookingsPage = () => {
               const isOverdue = cycleEndDate && new Date() > cycleEndDate;
 
               return (
-                <Animated.View key={booking.id} entering={FadeIn.duration(300).delay(index * 100)}>
-                  <Card
-                    style={[
-                      styles.card,
-                      {
-                        borderColor: isOverdue ? theme.colors.error : theme.colors.primary,
-                      },
-                    ]}
-                  >
-                    <Card.Content style={styles.cardContent}>
-                      {/* Header */}
-                      <View style={styles.cardHeader}>
-                        <View style={styles.roomInfo}>
-                          <Avatar.Icon size={40} icon="hotel" style={{ backgroundColor: theme.colors.primary }} />
-                          <Text variant="titleMedium" style={{ fontWeight: 'bold', marginLeft: 8 }}>
-                            Room {booking.roomNo}
-                          </Text>
-                        </View>
-                        <Chip
-                          icon={() => <Icon name={isOverdue ? "warning" : "check-circle"} size={18} color={isOverdue ? theme.colors.error : theme.colors.primary} />}
-                          style={{ backgroundColor: isOverdue ? `${theme.colors.error}20` : `${theme.colors.primary}20` }}
-                        >
-                          <Text style={{ color: isOverdue ? theme.colors.error : theme.colors.primary }}>
-                            {isOverdue ? "Overdue" : "Active"}
-                          </Text>
-                        </Chip>
-                      </View>
-
-                      {/* Guest Info */}
-                      <View style={styles.detailRow}>
-                        <Icon name="person" size={18} color={theme.colors.onSurfaceVariant} />
-                        <Text style={{ fontWeight: 'bold', marginLeft: 8 }}>
-                          {booking.guestName}
+                <Card
+                  key={booking.id}
+                  style={[
+                    styles.card,
+                    {
+                      borderColor: isOverdue ? '#F44336' : '#2196F3',
+                    },
+                  ]}
+                >
+                  <Card.Content style={styles.cardContent}>
+                    {/* Header */}
+                    <View style={styles.cardHeader}>
+                      <View style={styles.roomInfo}>
+                        <Avatar.Icon 
+                          size={40} 
+                          icon={() => <Ionicons name="bed" size={20} color="#2196F3" />} 
+                          style={{ backgroundColor: '#E3F2FD' }} 
+                        />
+                        <Text variant="titleMedium" style={{ fontWeight: 'bold', marginLeft: 8 }}>
+                          Room {booking.roomNo}
                         </Text>
                       </View>
-                      <View style={styles.detailRow}>
-                        <Icon name="phone" size={18} color={theme.colors.onSurfaceVariant} />
-                        <Text style={{ marginLeft: 8 }}>
-                          {booking.customerPhone}
-                        </Text>
-                      </View>
-                      <View style={styles.detailRow}>
-                        <Icon name="attach-money" size={18} color={theme.colors.success} />
-                        <Text style={{ fontWeight: 'bold', marginLeft: 8, color: theme.colors.success }}>
-                          ₹{parseFloat(booking.amount).toLocaleString()}
-                        </Text>
-                      </View>
-
-                      <Divider style={{ marginVertical: 12 }} />
-
-                      {/* Timing Info */}
-                      <View style={styles.detailRow}>
-                        <Icon name="schedule" size={18} color={theme.colors.info} />
-                        <Text style={{ marginLeft: 8, color: theme.colors.onSurfaceVariant }}>
-                          Check-in: {formatDate(booking.checkIn?.toDate())}
-                        </Text>
-                      </View>
-                      {cycleEndDate && (
-                        <View style={styles.detailRow}>
-                          <Icon name="schedule" size={18} color={isOverdue ? theme.colors.error : theme.colors.warning} />
-                          <Text style={{ marginLeft: 8, color: isOverdue ? theme.colors.error : theme.colors.warning }}>
-                            Cycle ends: {formatDate(cycleEndDate)}
-                          </Text>
-                        </View>
-                      )}
-                      
-                      {/* Persons */}
                       <Chip
-                        icon={() => <Icon name="people" size={18} />}
-                        style={{ marginTop: 12, backgroundColor: `${theme.colors.info}30` }}
+                        icon={() => <Ionicons name={isOverdue ? "warning" : "checkmark-circle"} size={18} color={isOverdue ? '#F44336' : '#4CAF50'} />}
+                        style={{ backgroundColor: isOverdue ? '#FFEBEE' : '#E8F5E8' }}
                       >
-                        <Text>
-                          {booking.numberOfPersons || 1} Guest{(booking.numberOfPersons || 1) > 1 ? 's' : ''}
+                        <Text style={{ color: isOverdue ? '#F44336' : '#4CAF50' }}>
+                          {isOverdue ? "Overdue" : "Active"}
                         </Text>
                       </Chip>
-                    </Card.Content>
+                    </View>
 
-                    <Card.Actions style={styles.cardActions}>
-                      {isOverdue ? (
-                        <>
-                          <Button mode="outlined" onPress={() => handleAlreadyCheckout(booking.id, booking.roomId, cycleEndDate)} style={{ borderRadius: 8 }}>
-                            Already Left
-                          </Button>
-                          <Button mode="contained" onPress={() => handleOpenExtendDialog(booking)} style={{ borderRadius: 8 }}>
-                            Extend
-                          </Button>
-                        </>
-                      ) : (
-                        <Button mode="contained" onPress={() => handleCheckout(booking.id, booking.roomId)} style={{ borderRadius: 8 }}>
-                          Checkout
+                    {/* Guest Info */}
+                    <View style={styles.detailRow}>
+                      <Ionicons name="person" size={18} color="#666" />
+                      <Text style={{ fontWeight: 'bold', marginLeft: 8 }}>
+                        {booking.guestName}
+                      </Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="call" size={18} color="#666" />
+                      <Text style={{ marginLeft: 8 }}>
+                        {booking.customerPhone}
+                      </Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <Ionicons name="cash" size={18} color="#4CAF50" />
+                      <Text style={{ fontWeight: 'bold', marginLeft: 8, color: '#4CAF50' }}>
+                        ₹{parseFloat(booking.amount).toLocaleString()}
+                      </Text>
+                    </View>
+
+                    <Divider style={{ marginVertical: 12 }} />
+
+                    {/* Timing Info */}
+                    <View style={styles.detailRow}>
+                      <Ionicons name="time" size={18} color="#2196F3" />
+                      <Text style={{ marginLeft: 8, color: theme.colors.onSurfaceVariant }}>
+                        Check-in: {formatDate(booking.checkIn?.toDate())}
+                      </Text>
+                    </View>
+                    {cycleEndDate && (
+                      <View style={styles.detailRow}>
+                        <Ionicons name="time" size={18} color={isOverdue ? '#F44336' : '#FF9800'} />
+                        <Text style={{ marginLeft: 8, color: isOverdue ? '#F44336' : '#FF9800' }}>
+                          Cycle ends: {formatDate(cycleEndDate)}
+                        </Text>
+                      </View>
+                    )}
+                    
+                    {/* Persons */}
+                    <Chip
+                      icon={() => <Ionicons name="people" size={18} />}
+                      style={{ marginTop: 12, backgroundColor: '#E3F2FD' }}
+                    >
+                      <Text>
+                        {booking.numberOfPersons || 1} Guest{(booking.numberOfPersons || 1) > 1 ? 's' : ''}
+                      </Text>
+                    </Chip>
+                  </Card.Content>
+
+                  <Card.Actions style={styles.cardActions}>
+                    {isOverdue ? (
+                      <>
+                        <Button mode="outlined" onPress={() => handleAlreadyCheckout(booking.id, booking.roomId, cycleEndDate)} style={{ borderRadius: 8 }}>
+                          Already Left
                         </Button>
-                      )}
-                    </Card.Actions>
-                  </Card>
-                </Animated.View>
+                        <Button mode="contained" onPress={() => handleOpenExtendDialog(booking)} style={{ borderRadius: 8 }}>
+                          Extend
+                        </Button>
+                      </>
+                    ) : (
+                      <Button mode="contained" onPress={() => handleCheckout(booking.id, booking.roomId)} style={{ borderRadius: 8 }}>
+                        Checkout
+                      </Button>
+                    )}
+                  </Card.Actions>
+                </Card>
               );
             })}
           </View>
         ) : (
           <Card style={styles.emptyStateCard}>
             <Card.Content style={styles.emptyStateContent}>
-              <Icon name="event-available" size={64} color={theme.colors.onSurfaceDisabled} />
+              <Ionicons name="time" size={64} color="#ccc" />
               <Text variant="titleMedium" style={styles.emptyStateText}>
                 No Active Bookings
               </Text>

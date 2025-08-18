@@ -33,11 +33,9 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { Ionicons } from '@expo/vector-icons';
 import RNModal from "react-native-modal";
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
-// Make sure to import your firebase config and db instance
 import { db } from "../config/firebase";
 
 const modalStyle = {
@@ -98,7 +96,7 @@ function BookingPage() {
 
   const handleNext = () => {
     if (step === 0 && selectedRooms.length !== parseInt(numRooms, 10)) {
-      Alert.alert(`Please select exactly ${numRooms} room(s).`);
+      Alert.alert("Error", `Please select exactly ${numRooms} room(s).`);
       return;
     }
     setStep(step + 1);
@@ -152,7 +150,7 @@ function BookingPage() {
 
   const handleSubmit = async () => {
     if (!guestName || !guestPhone || !idProofBase64) {
-      Alert.alert("Cannot submit. Guest details are missing.");
+      Alert.alert("Error", "Cannot submit. Guest details are missing.");
       return;
     }
     setIsSubmitting(true);
@@ -212,7 +210,7 @@ function BookingPage() {
         {/* Welcome Card */}
         <Card style={styles.welcomeCard}>
           <Card.Content style={styles.welcomeContent}>
-            <Icon name="hotel" size={48} color={theme.colors.primary} />
+            <Ionicons name="bed" size={48} color="#2196F3" />
             <Text variant="headlineSmall" style={styles.welcomeTitle}>
               Ready to Create a New Booking?
             </Text>
@@ -220,11 +218,11 @@ function BookingPage() {
               Click the "New Booking" button below to start the booking process for your guests.
             </Text>
             <Button
-              mode="outlined"
+              mode="contained"
               onPress={handleOpenModal}
               style={{ marginTop: 16 }}
             >
-              Get Started
+              New Booking
             </Button>
           </Card.Content>
         </Card>
@@ -253,13 +251,13 @@ function BookingPage() {
                         styles.stepIcon,
                         {
                           backgroundColor:
-                            index <= step ? theme.colors.primary : theme.colors.outline,
+                            index <= step ? '#2196F3' : '#ccc',
                         },
                       ]}
                     >
                       <Text style={{ color: 'white', fontWeight: 'bold' }}>{index + 1}</Text>
                     </View>
-                    <Text style={[styles.stepLabel, { color: index <= step ? theme.colors.primary : theme.colors.onSurfaceVariant }]}>
+                    <Text style={[styles.stepLabel, { color: index <= step ? '#2196F3' : '#666' }]}>
                       {label}
                     </Text>
                   </View>
@@ -271,9 +269,9 @@ function BookingPage() {
             <ScrollView contentContainerStyle={styles.modalBody}>
               {/* Step 1: Room Selection */}
               {step === 0 && (
-                <Animated.View entering={FadeIn.duration(300).delay(100)} exiting={FadeOut.duration(300)}>
+                <View>
                   <View style={styles.stepHeader}>
-                    <Icon name="hotel" size={24} color={theme.colors.primary} />
+                    <Ionicons name="bed" size={24} color="#2196F3" />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Select Rooms
                     </Text>
@@ -310,11 +308,11 @@ function BookingPage() {
                             styles.roomCard,
                             {
                               borderColor: selectedRooms.includes(room.id)
-                                ? theme.colors.primary
-                                : theme.colors.outlineVariant,
+                                ? '#2196F3'
+                                : '#ccc',
                               backgroundColor: selectedRooms.includes(room.id)
-                                ? theme.colors.primaryContainer
-                                : theme.colors.surface,
+                                ? '#E3F2FD'
+                                : '#fff',
                             },
                           ]}
                         >
@@ -340,14 +338,14 @@ function BookingPage() {
                       </Text>
                     )}
                   </View>
-                </Animated.View>
+                </View>
               )}
 
               {/* Step 2: Guest and Payment Details */}
               {step === 1 && (
-                <Animated.View entering={FadeIn.duration(300).delay(100)} exiting={FadeOut.duration(300)}>
+                <View>
                   <View style={styles.stepHeader}>
-                    <Icon name="person" size={24} color={theme.colors.primary} />
+                    <Ionicons name="person" size={24} color="#2196F3" />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Guest & Payment Details
                     </Text>
@@ -373,7 +371,7 @@ function BookingPage() {
                     <Button
                       mode="outlined"
                       onPress={handleFileChange}
-                      icon="upload"
+                      icon={() => <Ionicons name="cloud-upload" size={20} />}
                       style={{ marginBottom: 8 }}
                     >
                       Upload ID Proof
@@ -426,14 +424,14 @@ function BookingPage() {
                       })}
                     </ScrollView>
                   </View>
-                </Animated.View>
+                </View>
               )}
 
               {/* Step 3: Review & Confirm */}
               {step === 2 && (
-                <Animated.View entering={FadeIn.duration(300).delay(100)} exiting={FadeOut.duration(300)}>
+                <View>
                   <View style={styles.stepHeader}>
-                    <Icon name="check-circle" size={24} color={theme.colors.primary} />
+                    <Ionicons name="checkmark-circle" size={24} color="#2196F3" />
                     <Text variant="titleMedium" style={styles.stepTitle}>
                       Review & Confirm Booking
                     </Text>
@@ -452,7 +450,9 @@ function BookingPage() {
                     {idProofBase64 && (
                       <View style={{ marginTop: 16 }}>
                         <Text style={{ fontWeight: 'bold' }}>ID Proof: (Simulated)</Text>
-                        <View style={styles.imagePlaceholder} />
+                        <View style={styles.imagePlaceholder}>
+                          <Text>ID Proof Image</Text>
+                        </View>
                       </View>
                     )}
                   </View>
@@ -479,12 +479,12 @@ function BookingPage() {
                     <Divider style={{ marginVertical: 12 }} />
                     <View style={styles.totalSummary}>
                       <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>Total Amount</Text>
-                      <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
+                      <Text variant="titleMedium" style={{ fontWeight: 'bold', color: '#2196F3' }}>
                         ₹{totalAmount.toFixed(2)}
                       </Text>
                     </View>
                   </View>
-                </Animated.View>
+                </View>
               )}
             </ScrollView>
 
@@ -616,6 +616,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginBottom: 16,
+    backgroundColor: '#f5f5f5',
   },
   roomDetailsCard: {
     borderWidth: 1,

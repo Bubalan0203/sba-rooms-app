@@ -32,10 +32,8 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
-// Ensure your firebase config and db are imported
 import { db } from "../config/firebase";
 
 function RoomsPage() {
@@ -128,15 +126,15 @@ function RoomsPage() {
   };
 
   const getRoomIcon = (type) => {
-    return type === "AC" ? "ac-unit" : "air";
+    return type === "AC" ? "snow" : "leaf";
   };
 
   const getStatusIcon = (status) => {
-    return status === "Available" ? "check-circle" : "cancel";
+    return status === "Available" ? "checkmark-circle" : "close-circle";
   };
 
   const getStatusColor = (status) => {
-    return status === "Available" ? theme.colors.primary : theme.colors.error;
+    return status === "Available" ? "#4CAF50" : "#F44336";
   };
 
   if (loading) {
@@ -160,35 +158,33 @@ function RoomsPage() {
       <ScrollView contentContainerStyle={styles.container}>
         {/* Add/Edit Form */}
         {showForm && (
-          <Animated.View entering={FadeIn.duration(300).delay(100)} exiting={FadeOut.duration(300)}>
-            <Card style={styles.formCard}>
-              <Card.Content>
-                <Text variant="titleMedium" style={styles.formTitle}>
-                  {editId ? "Edit Room" : "Add New Room"}
-                </Text>
-                <TextInput
-                  label="Room Number"
-                  value={roomNo}
-                  onChangeText={setRoomNo}
-                  style={styles.textInput}
-                />
-                <TextInput
-                  label="Room Type"
-                  value={roomType}
-                  onChangeText={setRoomType}
-                  style={styles.textInput}
-                />
-              </Card.Content>
-              <Card.Actions style={styles.formActions}>
-                <Button onPress={resetForm} style={styles.formButton}>
-                  Cancel
-                </Button>
-                <Button mode="contained" onPress={handleSubmit} style={styles.formButton}>
-                  {editId ? "Update" : "Add Room"}
-                </Button>
-              </Card.Actions>
-            </Card>
-          </Animated.View>
+          <Card style={styles.formCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.formTitle}>
+                {editId ? "Edit Room" : "Add New Room"}
+              </Text>
+              <TextInput
+                label="Room Number"
+                value={roomNo}
+                onChangeText={setRoomNo}
+                style={styles.textInput}
+              />
+              <TextInput
+                label="Room Type"
+                value={roomType}
+                onChangeText={setRoomType}
+                style={styles.textInput}
+              />
+            </Card.Content>
+            <Card.Actions style={styles.formActions}>
+              <Button onPress={resetForm} style={styles.formButton}>
+                Cancel
+              </Button>
+              <Button mode="contained" onPress={handleSubmit} style={styles.formButton}>
+                {editId ? "Update" : "Add Room"}
+              </Button>
+            </Card.Actions>
+          </Card>
         )}
 
         {/* Rooms Grid */}
@@ -203,16 +199,16 @@ function RoomsPage() {
                   key={room.id}
                   style={[
                     styles.roomCard,
-                    { borderColor: `${getStatusColor(room.status)}` },
+                    { borderColor: getStatusColor(room.status) },
                   ]}
                 >
                   <Card.Content>
                     <View style={styles.cardHeader}>
-                      <View style={[styles.avatar, { backgroundColor: theme.colors.primaryContainer }]}>
-                        <Icon name="hotel" size={24} color={theme.colors.primary} />
+                      <View style={[styles.avatar, { backgroundColor: '#E3F2FD' }]}>
+                        <Ionicons name="bed" size={24} color="#2196F3" />
                       </View>
                       <View style={styles.statusChip}>
-                        <Icon
+                        <Ionicons
                           name={getStatusIcon(room.status)}
                           size={18}
                           color={getStatusColor(room.status)}
@@ -228,13 +224,19 @@ function RoomsPage() {
                     </Text>
 
                     <View style={styles.roomTypeContainer}>
-                      <Icon name={getRoomIcon(room.roomType)} size={20} color={theme.colors.textSecondary} />
+                      <Ionicons name={getRoomIcon(room.roomType)} size={20} color="#666" />
                       <Text style={{ marginLeft: 8 }}>{room.roomType}</Text>
                     </View>
                   </Card.Content>
                   <Card.Actions style={styles.cardActions}>
-                    <IconButton icon="pencil" onPress={() => handleEdit(room)} />
-                    <IconButton icon="delete" onPress={() => handleOpenDeleteDialog(room.id)} />
+                    <IconButton 
+                      icon={() => <Ionicons name="pencil" size={20} />} 
+                      onPress={() => handleEdit(room)} 
+                    />
+                    <IconButton 
+                      icon={() => <Ionicons name="trash" size={20} />} 
+                      onPress={() => handleOpenDeleteDialog(room.id)} 
+                    />
                   </Card.Actions>
                 </Card>
               ))}
@@ -242,7 +244,7 @@ function RoomsPage() {
           ) : (
             <Card style={styles.emptyStateCard}>
               <Card.Content style={styles.emptyStateContent}>
-                <Icon name="hotel" size={64} color={theme.colors.onSurfaceDisabled} />
+                <Ionicons name="bed" size={64} color="#ccc" />
                 <Text variant="titleMedium" style={styles.emptyStateText}>
                   No rooms found
                 </Text>
@@ -271,7 +273,7 @@ function RoomsPage() {
           </Dialog.Content>
           <Dialog.Actions>
             <Button onPress={handleCloseDeleteDialog}>Cancel</Button>
-            <Button onPress={confirmDelete} mode="contained" buttonColor={theme.colors.error}>
+            <Button onPress={confirmDelete} mode="contained" buttonColor="#F44336">
               Delete
             </Button>
           </Dialog.Actions>
@@ -280,7 +282,7 @@ function RoomsPage() {
 
       {/* FAB */}
       <FAB
-        icon="plus"
+        icon={() => <Ionicons name="add" size={24} />}
         label="Add New Room"
         onPress={() => setShowForm(true)}
         style={styles.fab}

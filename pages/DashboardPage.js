@@ -6,6 +6,7 @@ import {
   Alert,
   TouchableOpacity,
   Platform,
+  Dimensions,
 } from "react-native";
 import {
   Provider as PaperProvider,
@@ -20,13 +21,12 @@ import {
   Button,
 } from "react-native-paper";
 import { collection, onSnapshot } from "firebase/firestore";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { Ionicons } from '@expo/vector-icons';
 import {
   LineChart,
   BarChart,
 } from "react-native-chart-kit";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import {
   subDays,
   format,
@@ -34,9 +34,7 @@ import {
   startOfDay,
   endOfDay,
 } from "date-fns";
-import { Dimensions } from 'react-native';
 
-// Make sure to import your firebase config and db instance
 import { db } from "../config/firebase";
 
 const screenWidth = Dimensions.get("window").width;
@@ -45,40 +43,38 @@ const KPICard = ({ title, value, icon, color, trend }) => {
   const theme = useTheme();
   
   return (
-    <Animated.View entering={FadeIn.duration(500)}>
-      <Card
-        style={[
-          styles.kpiCard,
-          {
-            borderColor: `${color}30`,
-          },
-        ]}
-      >
-        <Card.Content style={styles.kpiCardContent}>
-          <View style={styles.kpiHeader}>
-            <Avatar.Icon
-              size={56}
-              icon={icon}
-              style={{ backgroundColor: `${color}20`, color: color }}
-            />
-            {trend && (
-              <Chip
-                icon={() => <Icon name="trending-up" size={18} />}
-                style={{ backgroundColor: `${theme.colors.success}20` }}
-              >
-                <Text style={{ color: theme.colors.success }}>{trend}</Text>
-              </Chip>
-            )}
-          </View>
-          <Text variant="headlineMedium" style={styles.kpiValue}>
-            {value}
-          </Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            {title}
-          </Text>
-        </Card.Content>
-      </Card>
-    </Animated.View>
+    <Card
+      style={[
+        styles.kpiCard,
+        {
+          borderColor: `${color}30`,
+        },
+      ]}
+    >
+      <Card.Content style={styles.kpiCardContent}>
+        <View style={styles.kpiHeader}>
+          <Avatar.Icon
+            size={56}
+            icon={() => <Ionicons name={icon} size={28} color={color} />}
+            style={{ backgroundColor: `${color}20` }}
+          />
+          {trend && (
+            <Chip
+              icon={() => <Ionicons name="trending-up" size={18} color={theme.colors.primary} />}
+              style={{ backgroundColor: `${theme.colors.primary}20` }}
+            >
+              <Text style={{ color: theme.colors.primary }}>{trend}</Text>
+            </Chip>
+          )}
+        </View>
+        <Text variant="headlineMedium" style={styles.kpiValue}>
+          {value}
+        </Text>
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+          {title}
+        </Text>
+      </Card.Content>
+    </Card>
   );
 };
 
@@ -201,20 +197,20 @@ const DashboardPage = () => {
   };
 
   const lineChartData = {
-    labels: revenueOverTime.labels,
+    labels: revenueOverTime.labels.length > 0 ? revenueOverTime.labels : ['No Data'],
     datasets: [{
-      data: revenueOverTime.data,
-      color: (opacity = 1) => theme.colors.primary,
+      data: revenueOverTime.data.length > 0 ? revenueOverTime.data : [0],
+      color: (opacity = 1) => `rgba(33, 150, 243, ${opacity})`,
       strokeWidth: 3,
     }],
     legend: ["Revenue"]
   };
   
   const barChartData = {
-    labels: bookingsByRoom.labels,
+    labels: bookingsByRoom.labels.length > 0 ? bookingsByRoom.labels : ['No Data'],
     datasets: [{
-      data: bookingsByRoom.data,
-      color: (opacity = 1) => theme.colors.secondary,
+      data: bookingsByRoom.data.length > 0 ? bookingsByRoom.data : [0],
+      color: (opacity = 1) => `rgba(76, 175, 80, ${opacity})`,
     }],
     legend: ["# of Bookings"]
   };
@@ -229,7 +225,7 @@ const DashboardPage = () => {
     propsForDots: {
       r: "6",
       strokeWidth: "2",
-      stroke: theme.colors.primary,
+      stroke: "#2196F3",
     },
     decimalPlaces: 0,
   };
@@ -238,6 +234,7 @@ const DashboardPage = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 16 }}>Loading dashboard...</Text>
       </View>
     );
   }
@@ -301,132 +298,120 @@ const DashboardPage = () => {
           <KPICard
             title="Total Revenue"
             value={`₹${totalRevenue.toLocaleString()}`}
-            icon="attach-money"
-            color={theme.colors.success}
+            icon="cash"
+            color="#4CAF50"
             trend="+12%"
           />
           <KPICard
             title="Total Bookings"
             value={totalBookings}
-            icon="hotel"
-            color={theme.colors.primary}
+            icon="bed"
+            color="#2196F3"
             trend="+8%"
           />
           <KPICard
             title="Occupancy Rate"
             value={`${occupancyRate.toFixed(1)}%`}
-            icon="assessment"
-            color={theme.colors.warning}
+            icon="analytics"
+            color="#FF9800"
             trend="+5%"
           />
           <KPICard
             title="Avg. Daily Rate"
             value={`₹${averageDailyRate.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             icon="trending-up"
-            color={theme.colors.secondary}
+            color="#9C27B0"
             trend="+15%"
           />
         </View>
 
         {/* Charts */}
         <View style={styles.chartContainer}>
-          <Animated.View entering={FadeIn.duration(500).delay(200)}>
-            <Card style={styles.chartCard}>
-              <Card.Content>
-                <Text variant="titleMedium" style={styles.chartTitle}>
-                  Revenue Trend
-                </Text>
-                {revenueOverTime.labels.length > 0 ? (
-                  <LineChart
-                    data={lineChartData}
-                    width={screenWidth - 64}
-                    height={220}
-                    chartConfig={{
-                        ...chartConfig,
-                        color: (opacity = 1) => theme.colors.primary,
-                    }}
-                    bezier
-                    style={styles.chart}
-                  />
-                ) : (
-                  <View style={styles.noDataContainer}>
-                    <Text style={styles.noDataText}>No data for this period.</Text>
-                  </View>
-                )}
-              </Card.Content>
-            </Card>
-          </Animated.View>
-        </View>
-
-        <View style={styles.chartContainer}>
-          <Animated.View entering={FadeIn.duration(500).delay(300)}>
-            <Card style={styles.chartCard}>
-              <Card.Content>
-                <Text variant="titleMedium" style={styles.chartTitle}>
-                  Bookings by Room
-                </Text>
-                {bookingsByRoom.labels.length > 0 ? (
-                  <BarChart
-                    data={barChartData}
-                    width={screenWidth - 64}
-                    height={220}
-                    chartConfig={{
-                        ...chartConfig,
-                        color: (opacity = 1) => theme.colors.secondary,
-                    }}
-                    style={styles.chart}
-                    fromZero
-                  />
-                ) : (
-                  <View style={styles.noDataContainer}>
-                    <Text style={styles.noDataText}>No data for this period.</Text>
-                  </View>
-                )}
-              </Card.Content>
-            </Card>
-          </Animated.View>
-        </View>
-
-        {/* Performance Table */}
-        <Animated.View entering={FadeIn.duration(500).delay(400)}>
-          <Card style={styles.tableCard}>
-            <Card.Title
-              title="Room Performance"
-              subtitle="Detailed breakdown of bookings and revenue per room"
-            />
-            <Card.Content style={styles.tableContent}>
-              {performanceByRoom.length > 0 ? (
-                performanceByRoom.map((room, index) => (
-                  <View key={room.roomNo} style={styles.tableRow}>
-                    <View style={styles.tableCell}>
-                      <Avatar.Text size={32} label={room.roomNo} />
-                      <Text style={{ marginLeft: 8 }}>Room {room.roomNo}</Text>
-                    </View>
-                    <View style={styles.tableCell}>
-                      <Chip>{room.totalBookings}</Chip>
-                    </View>
-                    <View style={styles.tableCell}>
-                      <Text style={{ fontWeight: 'bold', color: theme.colors.success }}>
-                        ₹{room.totalRevenue.toLocaleString()}
-                      </Text>
-                    </View>
-                    <View style={styles.tableCell}>
-                      <ProgressBar
-                        progress={Math.min((room.totalRevenue / Math.max(...performanceByRoom.map(r => r.totalRevenue))) * 100, 100) / 100}
-                        color={index === 0 ? theme.colors.success : theme.colors.primary}
-                        style={{ width: 80 }}
-                      />
-                    </View>
-                  </View>
-                ))
+          <Card style={styles.chartCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.chartTitle}>
+                Revenue Trend
+              </Text>
+              {revenueOverTime.labels.length > 0 ? (
+                <LineChart
+                  data={lineChartData}
+                  width={screenWidth - 64}
+                  height={220}
+                  chartConfig={chartConfig}
+                  bezier
+                  style={styles.chart}
+                />
               ) : (
                 <View style={styles.noDataContainer}>
-                  <Text style={styles.noDataText}>No performance data available for this period.</Text>
+                  <Text style={styles.noDataText}>No data for this period.</Text>
                 </View>
               )}
             </Card.Content>
           </Card>
-        </Animated.View>
+        </View>
+
+        <View style={styles.chartContainer}>
+          <Card style={styles.chartCard}>
+            <Card.Content>
+              <Text variant="titleMedium" style={styles.chartTitle}>
+                Bookings by Room
+              </Text>
+              {bookingsByRoom.labels.length > 0 ? (
+                <BarChart
+                  data={barChartData}
+                  width={screenWidth - 64}
+                  height={220}
+                  chartConfig={chartConfig}
+                  style={styles.chart}
+                  fromZero
+                />
+              ) : (
+                <View style={styles.noDataContainer}>
+                  <Text style={styles.noDataText}>No data for this period.</Text>
+                </View>
+              )}
+            </Card.Content>
+          </Card>
+        </View>
+
+        {/* Performance Table */}
+        <Card style={styles.tableCard}>
+          <Card.Title
+            title="Room Performance"
+            subtitle="Detailed breakdown of bookings and revenue per room"
+          />
+          <Card.Content style={styles.tableContent}>
+            {performanceByRoom.length > 0 ? (
+              performanceByRoom.map((room, index) => (
+                <View key={room.roomNo} style={styles.tableRow}>
+                  <View style={styles.tableCell}>
+                    <Avatar.Text size={32} label={room.roomNo} />
+                    <Text style={{ marginLeft: 8 }}>Room {room.roomNo}</Text>
+                  </View>
+                  <View style={styles.tableCell}>
+                    <Chip>{room.totalBookings}</Chip>
+                  </View>
+                  <View style={styles.tableCell}>
+                    <Text style={{ fontWeight: 'bold', color: '#4CAF50' }}>
+                      ₹{room.totalRevenue.toLocaleString()}
+                    </Text>
+                  </View>
+                  <View style={styles.tableCell}>
+                    <ProgressBar
+                      progress={Math.min((room.totalRevenue / Math.max(...performanceByRoom.map(r => r.totalRevenue))) * 100, 100) / 100}
+                      color={index === 0 ? '#4CAF50' : '#2196F3'}
+                      style={{ width: 80 }}
+                    />
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View style={styles.noDataContainer}>
+                <Text style={styles.noDataText}>No performance data available for this period.</Text>
+              </View>
+            )}
+          </Card.Content>
+        </Card>
       </ScrollView>
     </PaperProvider>
   );
