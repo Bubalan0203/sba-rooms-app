@@ -25,6 +25,7 @@ import {
   Icon,
 } from "react-native-paper";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { db } from "../config/firebase";
 
@@ -80,16 +81,21 @@ const AllBookingsPage = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Active': return theme.colors.primary;
-      case 'Completed': return theme.colors.success;
-      case 'Extended': return theme.colors.warning;
-      default: return theme.colors.onSurfaceVariant; // Fallback color
+      case 'Completed': return '#4CAF50'; // Green color for success
+      case 'Extended': return '#FF9800'; // Orange color for warning
+      default: return theme.colors.onSurfaceVariant;
     }
   };
 
-  // Corrected function to handle transparent color
   const getStatusBackgroundColor = (status) => {
     const color = getStatusColor(status);
-    return `${color}30`;
+    // Create a transparent version of the color
+    switch (status) {
+      case 'Active': return theme.colors.primaryContainer;
+      case 'Completed': return '#E8F5E8'; // Light green
+      case 'Extended': return '#FFF3E0'; // Light orange
+      default: return theme.colors.surfaceVariant;
+    }
   };
 
   const getStatusIcon = (status) => {
@@ -173,10 +179,10 @@ const AllBookingsPage = () => {
               <View style={styles.statContent}>
                 <Avatar.Icon 
                   size={40} 
-                  icon={() => <Icon source="bed" size={20} color={theme.colors.success} />} 
-                  style={{ backgroundColor: theme.colors.successContainer }} 
+                  icon={() => <Icon source="bed" size={20} color="#4CAF50" />} 
+                  style={{ backgroundColor: '#E8F5E8' }} 
                 />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.success }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#4CAF50' }}>
                   {stats.active}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Active</Text>
@@ -186,10 +192,10 @@ const AllBookingsPage = () => {
               <View style={styles.statContent}>
                 <Avatar.Icon 
                   size={40} 
-                  icon={() => <Icon source="calendar-check" size={20} color={theme.colors.warning} />} 
-                  style={{ backgroundColor: theme.colors.warningContainer }} 
+                  icon={() => <Icon source="calendar-check" size={20} color="#FF9800" />} 
+                  style={{ backgroundColor: '#FFF3E0' }} 
                 />
-                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.warning }}>
+                <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: '#FF9800' }}>
                   {stats.completed}
                 </Text>
                 <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>Completed</Text>
@@ -224,10 +230,9 @@ const AllBookingsPage = () => {
             style={styles.textInput}
             label="Status Filter"
             value={statusFilter}
-            onChangeText={setSearchTerm}
             right={<TextInput.Icon icon={() => <Icon source="menu-down" size={20} />} />}
             showSoftInputOnFocus={false}
-            onPressIn={() => Alert.alert("Filter", "This is a placeholder for a status picker. Select a status.", [
+            onPressIn={() => Alert.alert("Filter", "Select a status to filter by:", [
               { text: "All", onPress: () => setStatusFilter("All") },
               { text: "Active", onPress: () => setStatusFilter("Active") },
               { text: "Completed", onPress: () => setStatusFilter("Completed") },
@@ -252,20 +257,20 @@ const AllBookingsPage = () => {
                         <Text style={{ color: theme.colors.onSurfaceVariant }}>{booking.guestName}</Text>
                       </View>
                       <View style={styles.cell}>
-                       <Chip
-                        icon={() => (
-                          <Icon
-                            source={getStatusIcon(booking.status)}
-                            size={18}
-                            color={getStatusColor(booking.status)}
-                          />
-                        )}
-                        style={{
-                          backgroundColor: getStatusBackgroundColor(booking.status),
-                        }}
-                      >
-                        <Text style={{ color: getStatusColor(booking.status) }}>{booking.status}</Text>
-                      </Chip>
+                        <Chip
+                          icon={() => (
+                            <Icon
+                              source={getStatusIcon(booking.status)}
+                              size={18}
+                              color={getStatusColor(booking.status)}
+                            />
+                          )}
+                          style={{
+                            backgroundColor: getStatusBackgroundColor(booking.status),
+                          }}
+                        >
+                          <Text style={{ color: getStatusColor(booking.status) }}>{booking.status}</Text>
+                        </Chip>
                         <Text style={{ marginTop: 4, color: theme.colors.primary }}>
                           ₹{booking.amount?.toLocaleString()}
                         </Text>
@@ -369,8 +374,6 @@ const AllBookingsPage = () => {
     </PaperProvider>
   );
 };
-
-// ... (rest of the StyleSheet remains unchanged)
 
 const styles = StyleSheet.create({
   container: {
